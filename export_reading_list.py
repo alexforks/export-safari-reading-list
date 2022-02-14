@@ -58,12 +58,13 @@ class ReadingListItem(json.JSONEncoder):
     WebBookmarkType: str
     WebBookmarkUUID: str
     URLString: str
-    DateAdded: datetime.datetime
 
     Data: Union[str,None] = None
     siteName: Union[str,None] = None
     PreviewText: Union[str,None] = None
+    DateAdded: Union[datetime.datetime,None] = None
     DateLastFetched: Union[datetime.datetime,None] = None
+    DateLastViewed: Union[datetime.datetime,None] = None
     imageURL: Union[str,None] = None
     didAttemptToFetchIconFromImageUrlKey: Union[bool,None] = None
     NumberOfFailedLoadsWithUnknownOrNonRecoverableError: Union[int,None] = None
@@ -78,8 +79,7 @@ class ReadingListItem(json.JSONEncoder):
             "neverFetchMetadata": self.neverFetchMetadata,
             "WebBookmarkType": self.WebBookmarkType,
             "WebBookmarkUUID": self.WebBookmarkUUID,
-            "URLString": self.URLString,
-            "DateAdded": self.DateAdded.strftime(df)
+            "URLString": self.URLString
             }
 
         if self.Data != None:
@@ -88,8 +88,12 @@ class ReadingListItem(json.JSONEncoder):
             res["siteName"] = self.siteName
         if self.PreviewText != None:
             res["PreviewText"] = self.PreviewText
+        if self.DateAdded != None:
+            res["DateAdded"] = self.DateAdded.strftime(df)
         if self.DateLastFetched != None:
             res["DateLastFetched"] = self.DateLastFetched.strftime(df)
+        if self.DateLastViewed != None:
+            res["DateLastViewed"] = self.DateLastViewed.strftime(df)
         if self.imageURL != None:
             res["imageURL"] = self.imageURL
         if self.didAttemptToFetchIconFromImageUrlKey != None:
@@ -136,6 +140,11 @@ class ReadingListItem(json.JSONEncoder):
         else:
             res["DateLastFetched"] = None
 
+        if self.DateLastViewed != None:
+            res["DateLastViewed"] = self.DateLastViewed.strftime(df)
+        else:
+            res["DateLastViewed"] = None
+
         return res
 
     @classmethod
@@ -146,19 +155,22 @@ class ReadingListItem(json.JSONEncoder):
             neverFetchMetadata=r['ReadingListNonSync']['neverFetchMetadata'],
             WebBookmarkType=r['WebBookmarkType'],
             WebBookmarkUUID=r['WebBookmarkUUID'],
-            URLString=r['URLString'],
-            DateAdded=r['ReadingList']['DateAdded']
+            URLString=r['URLString']
             )
         
         if include_data:
             ritem.Data = r['Sync']['Data']
-        
+
         if 'ReadingListNonSync' in r and 'siteName' in r['ReadingListNonSync']:
             ritem.siteName = r['ReadingListNonSync']['siteName']
         if 'ReadingList' in r and 'PreviewText' in r['ReadingList']:
             ritem.PreviewText = r['ReadingList']['PreviewText']
+        if 'ReadingList' in r and 'DateAdded' in r['ReadingList']:
+            ritem.DateAdded = r['ReadingList']['DateAdded']
         if 'ReadingListNonSync' in r and 'DateLastFetched' in r['ReadingListNonSync']:
             ritem.DateLastFetched = r['ReadingListNonSync']['DateLastFetched']
+        if 'ReadingListNonSync' in r and 'DateLastViewed' in r['ReadingListNonSync']:
+            ritem.DateLastViewed = r['ReadingListNonSync']['DateLastViewed']
         if 'imageURL' in r:
             ritem.imageURL = r['imageURL']
         if 'ReadingListNonSync' in r \
