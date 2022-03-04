@@ -53,12 +53,12 @@ def find_dicts_with_rlist_keys_in_dict(base_dict):
 class ReadingListItem(json.JSONEncoder):
 
     title: str
-    ServerID: str
     neverFetchMetadata: bool
     WebBookmarkType: str
     WebBookmarkUUID: str
     URLString: str
 
+    ServerID: Union[str,None] = None
     Data: Union[str,None] = None
     siteName: Union[str,None] = None
     PreviewText: Union[str,None] = None
@@ -75,13 +75,14 @@ class ReadingListItem(json.JSONEncoder):
         df = "%Y-%m-%d %H:%M:%S"
         res = {
             "title": self.title,
-            "ServerID": self.ServerID,
             "neverFetchMetadata": self.neverFetchMetadata,
             "WebBookmarkType": self.WebBookmarkType,
             "WebBookmarkUUID": self.WebBookmarkUUID,
             "URLString": self.URLString
             }
 
+        if self.ServerID != None:
+            res["ServerID"] = self.ServerID
         if self.Data != None:
             res["Data"] = base64.b64encode(self.Data).decode('utf-8')
         if self.siteName != None:
@@ -151,7 +152,6 @@ class ReadingListItem(json.JSONEncoder):
     def fromRDict(cls, r, include_data):
         ritem = cls(
             title=r['URIDictionary']['title'],
-            ServerID=r['Sync']['ServerID'],
             neverFetchMetadata=r['ReadingListNonSync']['neverFetchMetadata'],
             WebBookmarkType=r['WebBookmarkType'],
             WebBookmarkUUID=r['WebBookmarkUUID'],
@@ -161,6 +161,8 @@ class ReadingListItem(json.JSONEncoder):
         if include_data:
             ritem.Data = r['Sync']['Data']
 
+        if 'Sync' in r and 'Data' in r['Sync']:
+            ritem.ServerID = r['Sync']['ServerID']
         if 'ReadingListNonSync' in r and 'siteName' in r['ReadingListNonSync']:
             ritem.siteName = r['ReadingListNonSync']['siteName']
         if 'ReadingList' in r and 'PreviewText' in r['ReadingList']:
